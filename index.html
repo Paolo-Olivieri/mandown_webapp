@@ -3,117 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Man Down Monitor</title>
+    <title>Bluetooth Alarm WebApp</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f0f2f5;
+            margin: 2em;
         }
-
-        .card {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        button {
+            margin: 1em 0;
+            padding: 0.5em 1em;
+            font-size: 1em;
         }
-
-        .title {
-            font-size: 24px;
-            margin-bottom: 20px;
-            color: #1a1a1a;
-        }
-
-        .button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.2s;
-        }
-
-        .connect-btn {
-            background-color: #007bff;
-            color: white;
-        }
-
-        .connect-btn:hover {
-            background-color: #0056b3;
-        }
-
-        .disconnect-btn {
-            background-color: #dc3545;
-            color: white;
-        }
-
-        .disconnect-btn:hover {
-            background-color: #c82333;
-        }
-
-        .reset-btn {
-            background-color: #28a745;
-            color: white;
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .reset-btn:hover {
-            background-color: #218838;
-        }
-
-        .status {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 4px;
-        }
-
-        .status-normal {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        .status-warning {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-
-        .status-danger {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-
-        .battery-info {
-            margin-top: 10px;
-            color: #666;
-        }
-
-        .button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        #log {
+            margin-top: 1em;
+            padding: 1em;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+            height: 200px;
+            overflow-y: scroll;
         }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1 class="title">Man Down Monitor</h1>
-        
-        <div class="controls">
-            <button id="connectButton" class="button connect-btn">Connect Device</button>
-            <div id="batteryInfo" class="battery-info"></div>
-        </div>
-
-        <div id="statusDisplay" class="status" style="display: none;"></div>
-        <button id="resetButton" class="button reset-btn" style="display: none;">Reset Alarm</button>
-    </div>
+    <h1>Bluetooth Alarm WebApp</h1>
+    <button id="connectBtn">Connetti al dispositivo Bluetooth</button>
+    <div id="log"></div>
 
     <script>
         const FALL_DETECTION_SERVICE = "19b10000-0000-537e-4f6c-d104768a1214";
@@ -121,136 +35,48 @@
         const BATTERY_SERVICE = "180f";
         const BATTERY_CHARACTERISTIC = "2a19";
 
-        let device = null;
-        let fallCharacteristic = null;
-        let batteryCharacteristic = null;
+        const log = (message) => {
+            const logDiv = document.getElementById('log');
+            logDiv.textContent += `${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        };
 
-        const connectButton = document.getElementById('connectButton');
-        const resetButton = document.getElementById('resetButton');
-        const statusDisplay = document.getElementById('statusDisplay');
-        const batteryInfo = document.getElementById('batteryInfo');
-
-        function updateStatusDisplay(status) {
-            statusDisplay.style.display = 'block';
-            resetButton.style.display = 'none';
-
-            switch(status) {
-                case 0x00:
-                    statusDisplay.className = 'status status-normal';
-                    statusDisplay.textContent = 'Status: Normal - No Alarm';
-                    break;
-                case 0x01:
-                    statusDisplay.className = 'status status-warning';
-                    statusDisplay.textContent = 'Fall Detected! Check on the person';
-                    resetButton.style.display = 'block';
-                    break;
-                case 0x02:
-                    statusDisplay.className = 'status status-danger';
-                    statusDisplay.textContent = 'EMERGENCY - Man Down! Immediate assistance required!';
-                    resetButton.style.display = 'block';
-                    break;
-            }
-        }
-
-        function handleDisconnection() {
-            device = null;
-            fallCharacteristic = null;
-            batteryCharacteristic = null;
-            connectButton.textContent = 'Connect Device';
-            connectButton.className = 'button connect-btn';
-            statusDisplay.style.display = 'none';
-            resetButton.style.display = 'none';
-            batteryInfo.textContent = '';
-        }
-
-        async function connectToDevice() {
+        document.getElementById('connectBtn').addEventListener('click', async () => {
             try {
-                connectButton.disabled = true;
-                connectButton.textContent = 'Connecting...';
+                log('Richiesta di connessione al dispositivo Bluetooth in corso...');
 
-                device = await navigator.bluetooth.requestDevice({
-                    filters: [{ name: 'Man Down' }],
-                    optionalServices: [FALL_DETECTION_SERVICE, BATTERY_SERVICE]
+                const device = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: false,
+                    optionalServices: [FALL_DETECTION_SERVICE, BATTERY_SERVICE],
+                    filters: [{ services: [FALL_DETECTION_SERVICE] }]
                 });
 
-                device.addEventListener('gattserverdisconnected', handleDisconnection);
-                
+                log(`Dispositivo selezionato: ${device.name}`);
+
                 const server = await device.gatt.connect();
-                
-                // Connect to Fall Detection Service
+                log('Connessione al GATT server riuscita.');
+
                 const fallService = await server.getPrimaryService(FALL_DETECTION_SERVICE);
-                fallCharacteristic = await fallService.getCharacteristic(FALL_ALARM_CHARACTERISTIC);
-                await fallCharacteristic.startNotifications();
+                const fallCharacteristic = await fallService.getCharacteristic(FALL_ALARM_CHARACTERISTIC);
                 
+                fallCharacteristic.startNotifications();
+                log('Sottoscrizione alle notifiche degli allarmi in corso...');
+
                 fallCharacteristic.addEventListener('characteristicvaluechanged', (event) => {
-                    const value = event.target.value.getUint8(0);
-                    updateStatusDisplay(value);
+                    const value = new Uint8Array(event.target.value.buffer);
+                    log(`Allarme ricevuto: ${value}`);
                 });
 
-                // Connect to Battery Service
                 const batteryService = await server.getPrimaryService(BATTERY_SERVICE);
-                batteryCharacteristic = await batteryService.getCharacteristic(BATTERY_CHARACTERISTIC);
-                await batteryCharacteristic.startNotifications();
+                const batteryCharacteristic = await batteryService.getCharacteristic(BATTERY_CHARACTERISTIC);
+                const batteryValue = await batteryCharacteristic.readValue();
+                const batteryLevel = batteryValue.getUint8(0);
+                log(`Livello batteria: ${batteryLevel}%`);
 
-                batteryCharacteristic.addEventListener('characteristicvaluechanged', (event) => {
-                    const value = event.target.value.getUint8(0);
-                    batteryInfo.textContent = `Battery: ${value}%`;
-                });
-
-                // Read initial values
-                const initialAlarmValue = await fallCharacteristic.readValue();
-                updateStatusDisplay(initialAlarmValue.getUint8(0));
-
-                const initialBatteryValue = await batteryCharacteristic.readValue();
-                batteryInfo.textContent = `Battery: ${initialBatteryValue.getUint8(0)}%`;
-
-                connectButton.textContent = 'Disconnect';
-                connectButton.className = 'button disconnect-btn';
-                
             } catch (error) {
-                console.error('Connection failed:', error);
-                handleDisconnection();
-            } finally {
-                connectButton.disabled = false;
-            }
-        }
-
-        async function disconnectDevice() {
-            if (device) {
-                await device.gatt.disconnect();
-                handleDisconnection();
-            }
-        }
-
-        async function resetAlarm() {
-            if (fallCharacteristic) {
-                try {
-                    resetButton.disabled = true;
-                    const resetValue = new Uint8Array([0x00]);
-                    await fallCharacteristic.writeValue(resetValue);
-                } catch (error) {
-                    console.error('Reset failed:', error);
-                } finally {
-                    resetButton.disabled = false;
-                }
-            }
-        }
-
-        connectButton.addEventListener('click', async () => {
-            if (device) {
-                await disconnectDevice();
-            } else {
-                await connectToDevice();
+                log(`Errore: ${error.message}`);
             }
         });
-
-        resetButton.addEventListener('click', resetAlarm);
-
-        // Check if Web Bluetooth is supported
-        if (!navigator.bluetooth) {
-            connectButton.disabled = true;
-            alert('Web Bluetooth is not supported in your browser. Please use Chrome, Edge, or Opera.');
-        }
     </script>
 </body>
 </html>
