@@ -2,8 +2,8 @@
         const FALL_SERVICE_UUID = '19b10000-0000-537e-4f6c-d104768a1214';
         const FALL_CHARACTERISTIC_UUID = '19b10000-1111-537e-4f6c-d104768a1214';
         
-        const BATTERY_SERVICE_UUID = '180F';  // UUID standard per il servizio batteria
-        const BATTERY_CHARACTERISTIC_UUID = '2A19';  // UUID standard per la caratteristica livello batteria
+        const BATTERY_SERVICE_UUID = '0x180F';  // UUID standard per il servizio batteria
+        const BATTERY_CHARACTERISTIC_UUID = '0x2A19';  // UUID standard per la caratteristica livello batteria
 
         // Telegram configuration
         const BOT_TOKEN = '7795056451:AAEeJD6Dg7s1WL2hB8JeSNCMZdtqOZNcMaM';
