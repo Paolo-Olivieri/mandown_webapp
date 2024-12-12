@@ -202,7 +202,10 @@
                     statusDiv.className = 'connected';
                     resetAlarmBtn.style.display = 'none';
                     stopAlarm();
-                    const okMessage = "✅ La persona sta bene ✅ \n\n Il sistema sta monitorando lo stato della persona";
+                    const okMessage = `
+✅ <b>La persona sta bene</b> ✅
+
+Il sistema sta monitorando lo stato della persona`;
                     sendTelegramAlert(okMessage);
                     break;
                 case 0x01:
@@ -211,13 +214,13 @@
                     resetAlarmBtn.style.display = 'block';
                     playAlarm();
                     const fallMessage = `
-🚨 ATTENZIONE: Rilevata Caduta!
+🚨 <b>ATTENZIONE: Rilevata Caduta!</b>
                     
-⏰ Ora: ${timestamp}
-📍 Posizione: Non disponibile
-ℹ️ Stato: In attesa di conferma recupero
+⏰ <i>Ora</i>: ${new Date().toLocaleString('it-IT')}
+📍 <i>Posizione</i>: Non disponibile
+ℹ️ <i>Stato</i>: In attesa di conferma recupero
                     
-Il sistema sta monitorando il recupero della persona. Se non viene rilevato un recupero entro 60 secondi, verrà attivato l'allarme di emergenza.`;
+<i>Il sistema sta monitorando il recupero della persona. Se non viene rilevato un recupero entro 60 secondi, verrà attivato l'allarme di emergenza.</i>`;
                     sendTelegramAlert(fallMessage);
                     break;
                     
@@ -227,11 +230,11 @@ Il sistema sta monitorando il recupero della persona. Se non viene rilevato un r
                     resetAlarmBtn.style.display = 'none';
                     playAlarm();
                     const emergencyMessage = `
-🚨🚨 EMERGENZA GRAVE: PERSONA A TERRA!
+🚨🚨 <b>EMERGENZA GRAVE: PERSONA A TERRA!</b>
                     
-⏰ Ora: ${timestamp}
-📍 Posizione: Non disponibile
-❗️ Stato: Richiesto intervento immediato
+⏰ <i>Ora</i>: ${new Date().toLocaleString('it-IT')}
+📍 <i>Posizione</i>: Non disponibile
+❗️ <i>Stato</i>: Richiesto intervento immediato
                     
 La persona non si è rialzata dopo la caduta. È necessario un intervento immediato!`;
                     sendTelegramAlert(emergencyMessage);
@@ -266,7 +269,8 @@ La persona non si è rialzata dopo la caduta. È necessario un intervento immedi
         function handleDisconnection() {
             stopAlarm();
             const disconnectionMessage =`
-🔴 DISPOSITIVO DISCONNESSO 🔴
+🔴 <b>DISPOSITIVO DISCONNESSO</b>
+
 ⚠️ Il monitoraggio è stato interrotto`;
             sendTelegramAlert(disconnectionMessage);
             statusDiv.textContent = 'Status: Disconnected';
