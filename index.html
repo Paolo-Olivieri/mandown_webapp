@@ -194,11 +194,11 @@
                     statusDiv.className = 'connected';
                     resetAlarmBtn.style.display = 'none';
                     stopAlarm();
-                    const fallMessage = `
+                    const okMessage = `
 ✅ La persona sta bene ✅
                     
 Il sistema sta monitorando lo stato della persona`;
-                    sendTelegramAlert(fallMessage);
+                    sendTelegramAlert(okMessage);
                     break;
                 case 0x01:
                     statusDiv.textContent = 'Status: Fall Detected!';
