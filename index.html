@@ -5,76 +5,221 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Man Down Monitor</title>
     <style>
+        :root {
+            --primary-color: #007bff;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --border-radius: 10px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            background-color: #f5f7fa;
+            min-height: 100vh;
         }
+
         .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            transition: background-color 0.3s;
+
+        h1 {
+            color: var(--dark-color);
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
         }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
         button:disabled {
             background-color: #cccccc;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
+
         #resetAlarmBtn {
-            background-color: #dc3545;
+            background-color: var(--danger-color);
             display: none;
         }
+
         #resetAlarmBtn:hover {
             background-color: #c82333;
         }
+
         #status {
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: var(--border-radius);
+            font-size: 1.2rem;
+            font-weight: 500;
+            text-align: center;
+            transition: all 0.3s ease;
         }
+
         .connected {
             background-color: #d4edda;
             color: #155724;
+            border: 2px solid #c3e6cb;
         }
+
         .disconnected {
             background-color: #f8d7da;
             color: #721c24;
+            border: 2px solid #f5c6cb;
         }
+
         .alarm {
-            background-color: #dc3545;
+            background-color: var(--danger-color);
             color: white;
+            border: 2px solid #bd2130;
             animation: blink 1s infinite;
         }
+
         @keyframes blink {
+            0% { opacity: 1; }
             50% { opacity: 0.8; }
+            100% { opacity: 1; }
         }
+
         #soundToggle {
-            margin-top: 20px;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 10px;
+            padding: 15px;
+            background-color: var(--light-color);
+            border-radius: var(--border-radius);
+            margin-top: 20px;
+        }
+
+        #soundToggle input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        #soundToggle label {
+            font-size: 1.1rem;
+            color: var(--dark-color);
+            cursor: pointer;
+        }
+
+        .status-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .device-info {
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+
+        .main-card {
+            background: linear-gradient(145deg, #ffffff, #f5f7fa);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .app-logo {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            button {
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Man Down Monitor</h1>
-        <div id="status" class="disconnected">Status: Disconnected</div>
-        <button id="connectBtn">Connect Device</button>
-        <button id="resetAlarmBtn" style="display: none;">Reset Alarm</button>
+        <div class="app-header">
+            <span class="app-logo"></span>
+            <h1>Man Down Monitor</h1>
+        </div>
+
+        <div class="main-card">
+            <div id="status" class="disconnected">
+                <div class="status-icon">📡</div>
+                Status: Disconnected
+            </div>
+            <button id="connectBtn">Connect Device</button>
+            <button id="resetAlarmBtn" style="display: none;">Reset Alarm</button>
+        </div>
+
         <div id="soundToggle">
             <input type="checkbox" id="soundEnabled" checked>
-            <label for="soundEnabled">Enable Alarm Sound</label>
+            <label for="soundEnabled">🔊 Enable Alarm Sound</label>
+        </div>
+
+        <div class="device-info">
+            Last Updated: <span id="lastUpdate"></span>
         </div>
     </div>
 
