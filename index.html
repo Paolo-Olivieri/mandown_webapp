@@ -106,22 +106,17 @@
         connectBtn.addEventListener('click', handleConnectionClick);
         resetAlarmBtn.addEventListener('click', resetAlarm);
 
-        async function sendTelegramAlert(message) {
-            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+       async function sendTelegramAlert(message) {
+            // Encode il messaggio per l'URL
+            const encodedMessage = encodeURIComponent(message);
+            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodedMessage}&parse_mode=HTML`;
+            
             try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        chat_id: CHAT_ID,
-                        text: message,
-                        parse_mode: 'HTML'
-                    })
-                });
+                // Usando l'approccio con URL parameters invece che POST
+                const response = await fetch(url);
                 
                 if (!response.ok) {
+                    console.error('Telegram API error:', await response.text());
                     throw new Error('Failed to send Telegram notification');
                 }
                 
@@ -192,7 +187,7 @@
 
         function handleAlarmChange(event) {
             const value = event.target.value.getUint8(0);
-            const timestamp = new Date().toLocaleString();
+            const timestamp = new Date().toLocaleString('it-IT');
             switch(value) {
                 case 0x00:
                     statusDiv.textContent = 'Status: Connected - No Alarm';
