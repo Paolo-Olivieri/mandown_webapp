@@ -178,6 +178,14 @@
 
                 device.addEventListener('gattserverdisconnected', handleDisconnection);
 
+                const connectionMessage = 
+`🟢 DISPOSITIVO CONNESSO
+
+⏰ ${new Date().toLocaleString('it-IT')}
+✅ Sistema attivo e pronto al monitoraggio`;
+        
+        await sendTelegramAlert(connectionMessage);
+                
             } catch (error) {
                 console.error('Error:', error);
                 statusDiv.textContent = `Error: ${error.message}`;
@@ -260,6 +268,10 @@ La persona non si è rialzata dopo la caduta. È necessario un intervento immedi
 
         function handleDisconnection() {
             stopAlarm();
+            const disconnectionmessage = '
+🔴 DISPOSITIVO DISCONNESSO 🔴
+⚠️ Il monitoraggio è stato interrotto';
+            sendTelegramAlert(disconnectionMessage);
             statusDiv.textContent = 'Status: Disconnected';
             statusDiv.className = 'disconnected';
             connectBtn.textContent = 'Connect Device';
