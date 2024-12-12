@@ -3,80 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bluetooth Alarm WebApp</title>
+    <title>Man Down Monitor</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 2em;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
         button {
-            margin: 1em 0;
-            padding: 0.5em 1em;
-            font-size: 1em;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
         }
-        #log {
-            margin-top: 1em;
-            padding: 1em;
-            border: 1px solid #ccc;
-            background: #f9f9f9;
-            height: 200px;
-            overflow-y: scroll;
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #status {
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+        .connected {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
         }
     </style>
 </head>
 <body>
-    <h1>Bluetooth Alarm WebApp</h1>
-    <button id="connectBtn">Connetti al dispositivo Bluetooth</button>
-    <div id="log"></div>
+    <div class="container">
+        <h1>Man Down Monitor</h1>
+        <div id="status" class="disconnected">Status: Disconnected</div>
+        <button id="connectBtn">Connect Device</button>
+        <button id="resetAlarmBtn" disabled>Reset Alarm</button>
+    </div>
 
     <script>
-        const FALL_DETECTION_SERVICE = "19b10000-0000-537e-4f6c-d104768a1214";
-        const FALL_ALARM_CHARACTERISTIC = "19b10000-1111-537e-4f6c-d104768a1214";
-        const BATTERY_SERVICE = "0000180f-0000-1000-8000-00805f9b34fb"; // UUID completo del Battery Service
-        const BATTERY_CHARACTERISTIC = "2a19";
+        // BLE UUIDs from the Arduino code
+        const FALL_SERVICE_UUID = '19b10000-0000-537e-4f6c-d104768a1214';
+        const FALL_CHARACTERISTIC_UUID = '19b10000-1111-537e-4f6c-d104768a1214';
+        
+        let fallCharacteristic = null;
+        let device = null;
 
-        const log = (message) => {
-            const logDiv = document.getElementById('log');
-            logDiv.textContent += `${message}\n`;
-            logDiv.scrollTop = logDiv.scrollHeight;
-        };
+        const connectBtn = document.getElementById('connectBtn');
+        const resetAlarmBtn = document.getElementById('resetAlarmBtn');
+        const statusDiv = document.getElementById('status');
 
-        document.getElementById('connectBtn').addEventListener('click', async () => {
+        connectBtn.addEventListener('click', connectToDevice);
+        resetAlarmBtn.addEventListener('click', resetAlarm);
+
+        async function connectToDevice() {
             try {
-                log('Richiesta di connessione al dispositivo Bluetooth in corso...');
-
-                const device = await navigator.bluetooth.requestDevice({
-                    acceptAllDevices: false,
-                    optionalServices: [FALL_DETECTION_SERVICE, BATTERY_SERVICE],
-                    filters: [{ services: [FALL_DETECTION_SERVICE] }]
+                // Request device with the correct service UUID
+                device = await navigator.bluetooth.requestDevice({
+                    filters: [{ name: 'Man Down' }],
+                    optionalServices: [FALL_SERVICE_UUID]
                 });
 
-                log(`Dispositivo selezionato: ${device.name}`);
-
-                const server = await device.gatt.connect();
-                log('Connessione al GATT server riuscita.');
-
-                const fallService = await server.getPrimaryService(FALL_DETECTION_SERVICE);
-                const fallCharacteristic = await fallService.getCharacteristic(FALL_ALARM_CHARACTERISTIC);
+                statusDiv.textContent = 'Connecting...';
                 
-                fallCharacteristic.startNotifications();
-                log('Sottoscrizione alle notifiche degli allarmi in corso...');
+                // Connect to the device
+                const server = await device.gatt.connect();
+                
+                // Get the Fall Detection service
+                const service = await server.getPrimaryService(FALL_SERVICE_UUID);
+                
+                // Get the Fall Alarm characteristic
+                fallCharacteristic = await service.getCharacteristic(FALL_CHARACTERISTIC_UUID);
 
-                fallCharacteristic.addEventListener('characteristicvaluechanged', (event) => {
-                    const value = new Uint8Array(event.target.value.buffer);
-                    log(`Allarme ricevuto: ${value}`);
-                });
+                // Enable notifications
+                await fallCharacteristic.startNotifications();
+                fallCharacteristic.addEventListener('characteristicvaluechanged', handleAlarmChange);
 
-                const batteryService = await server.getPrimaryService(BATTERY_SERVICE);
-                const batteryCharacteristic = await batteryService.getCharacteristic(BATTERY_CHARACTERISTIC);
-                const batteryValue = await batteryCharacteristic.readValue();
-                const batteryLevel = batteryValue.getUint8(0);
-                log(`Livello batteria: ${batteryLevel}%`);
+                // Update UI
+                statusDiv.textContent = 'Status: Connected';
+                statusDiv.className = 'connected';
+                connectBtn.textContent = 'Disconnect';
+                resetAlarmBtn.disabled = false;
+
+                // Update connect button to handle disconnect
+                device.addEventListener('gattserverdisconnected', handleDisconnection);
 
             } catch (error) {
-                log(`Errore: ${error.message}`);
+                console.error('Error:', error);
+                statusDiv.textContent = `Error: ${error.message}`;
             }
-        });
+        }
+
+        function handleAlarmChange(event) {
+            const value = event.target.value.getUint8(0);
+            switch(value) {
+                case 0x00:
+                    statusDiv.textContent = 'Status: Connected - No Alarm';
+                    break;
+                case 0x01:
+                    statusDiv.textContent = 'Status: Fall Detected!';
+                    break;
+                case 0x02:
+                    statusDiv.textContent = 'Status: ALARM - MAN DOWN!';
+                    break;
+            }
+        }
+
+        async function resetAlarm() {
+            if (fallCharacteristic) {
+                try {
+                    // Write 0x00 to reset the alarm
+                    await fallCharacteristic.writeValue(new Uint8Array([0x00]));
+                    statusDiv.textContent = 'Status: Alarm Reset';
+                } catch (error) {
+                    console.error('Error resetting alarm:', error);
+                    statusDiv.textContent = `Error: ${error.message}`;
+                }
+            }
+        }
+
+        function handleDisconnection() {
+            statusDiv.textContent = 'Status: Disconnected';
+            statusDiv.className = 'disconnected';
+            connectBtn.textContent = 'Connect Device';
+            resetAlarmBtn.disabled = true;
+            fallCharacteristic = null;
+        }
     </script>
 </body>
 </html>
