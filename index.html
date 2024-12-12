@@ -87,6 +87,11 @@
         // BLE UUIDs from the Arduino code
         const FALL_SERVICE_UUID = '19b10000-0000-537e-4f6c-d104768a1214';
         const FALL_CHARACTERISTIC_UUID = '19b10000-1111-537e-4f6c-d104768a1214';
+
+        // Telegram configuration
+        const BOT_TOKEN = '7795056451:AAEeJD6Dg7s1WL2hB8JeSNCMZdtqOZNcMaM';
+        const CHAT_ID = '-4600073095'; // We'll add this once you get it
+        
         
         let fallCharacteristic = null;
         let device = null;
@@ -101,6 +106,32 @@
         connectBtn.addEventListener('click', handleConnectionClick);
         resetAlarmBtn.addEventListener('click', resetAlarm);
 
+        async function sendTelegramAlert(message) {
+            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: CHAT_ID,
+                        text: message,
+                        parse_mode: 'HTML'
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to send Telegram notification');
+                }
+                
+                console.log('Telegram notification sent successfully');
+            } catch (error) {
+                console.error('Error sending Telegram notification:', error);
+            }
+        }
+
+        
         async function handleConnectionClick() {
             if (isConnected) {
                 await disconnectDevice();
@@ -161,6 +192,7 @@
 
         function handleAlarmChange(event) {
             const value = event.target.value.getUint8(0);
+            const timestamp = new Date().toLocaleString();
             switch(value) {
                 case 0x00:
                     statusDiv.textContent = 'Status: Connected - No Alarm';
@@ -173,12 +205,31 @@
                     statusDiv.className = 'alarm';
                     resetAlarmBtn.style.display = 'block';
                     playAlarm();
+                    const fallMessage = `
+                    🚨 <b>ATTENZIONE: Rilevata Caduta!</b>
+                    
+                    ⏰ Ora: ${timestamp}
+                    📍 Posizione: Non disponibile
+                    ℹ️ Stato: In attesa di conferma recupero
+                    
+                    <i>Il sistema sta monitorando il recupero della persona. Se non viene rilevato un recupero entro 60 secondi, verrà attivato l'allarme di emergenza.</i>`;
+                    sendTelegramAlert(fallMessage);
                     break;
+                    
                 case 0x02:
                     statusDiv.textContent = 'Status: ALARM - MAN DOWN!';
                     statusDiv.className = 'alarm';
                     resetAlarmBtn.style.display = 'none';
                     playAlarm();
+                    const emergencyMessage = `
+                    🚨 <b>EMERGENZA: PERSONA A TERRA!</b>
+                    
+                    ⏰ Ora: ${timestamp}
+                    📍 Posizione: Non disponibile
+                    ❗️ Stato: Richiesto intervento immediato
+                    
+                    <i>La persona non si è rialzata dopo la caduta. È necessario un intervento immediato!</i>`;
+                    sendTelegramAlert(emergencyMessage);
                     break;
             }
         }
