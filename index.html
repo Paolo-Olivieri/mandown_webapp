@@ -202,10 +202,7 @@
                     statusDiv.className = 'connected';
                     resetAlarmBtn.style.display = 'none';
                     stopAlarm();
-                    const okMessage = `
-✅ La persona sta bene ✅
-                    
-Il sistema sta monitorando lo stato della persona`;
+                    const okMessage = "✅ La persona sta bene ✅ \n\n Il sistema sta monitorando lo stato della persona";
                     sendTelegramAlert(okMessage);
                     break;
                 case 0x01:
