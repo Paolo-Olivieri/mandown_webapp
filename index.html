@@ -183,19 +183,27 @@
             }
         }
 
-        async function resetAlarm() {
-            if (fallCharacteristic && isConnected) {
-                try {
-                    await fallCharacteristic.writeValue(new Uint8Array([0x00]));
-                    statusDiv.textContent = 'Status: Alarm Reset';
-                    statusDiv.className = 'connected';
-                    resetAlarmBtn.style.display = 'none';
-                    stopAlarm();
-                } catch (error) {
-                    console.error('Error resetting alarm:', error);
-                    statusDiv.textContent = `Error: ${error.message}`;
-                    handleDisconnection();
-                }
+       async function resetAlarm() {
+            if (!fallCharacteristic || !isConnected) {
+                console.error('Device not connected');
+                statusDiv.textContent = 'Error: Device not connected';
+                handleDisconnection();
+                return;
+            }
+        
+            try {
+                // Invia il comando di reset
+                await fallCharacteristic.writeValue(new Uint8Array([0x00]));
+                
+                // Aggiorna lo stato dell'interfaccia
+                statusDiv.textContent = 'Status: Connected - No Alarm';
+                statusDiv.className = 'connected';
+                resetAlarmBtn.style.display = 'none';
+                stopAlarm();
+            } catch (error) {
+                console.error('Error resetting alarm:', error);
+                statusDiv.textContent = `Error: ${error.message}`;
+                handleDisconnection();
             }
         }
 
