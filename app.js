@@ -1,13 +1,12 @@
         // BLE UUIDs from the Arduino code
         const FALL_SERVICE_UUID = '19b10000-0000-537e-4f6c-d104768a1214';
         const FALL_CHARACTERISTIC_UUID = '19b10000-1111-537e-4f6c-d104768a1214';
-        
-        const BATTERY_SERVICE_UUID = '0x180F';  // UUID standard per il servizio batteria
-        const BATTERY_CHARACTERISTIC_UUID = '0x2A19';  // UUID standard per la caratteristica livello batteria
+        const BATTERY_SERVICE_UUID = '0000180f-0000-1000-8000-00805f9b34fb';  
+        const BATTERY_CHARACTERISTIC_UUID = '00002a19-0000-1000-8000-00805f9b34fb'; 
 
         // Telegram configuration
         const BOT_TOKEN = '7795056451:AAEeJD6Dg7s1WL2hB8JeSNCMZdtqOZNcMaM';
-        const CHAT_ID = '-4600073095'; // We'll add this once you get it
+        const CHAT_ID = '-4600073095'; 
         
         
         let fallCharacteristic = null;
@@ -24,12 +23,10 @@
         resetAlarmBtn.addEventListener('click', resetAlarm);
 
        async function sendTelegramAlert(message) {
-            // Encode il messaggio per l'URL
             const encodedMessage = encodeURIComponent(message);
             const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodedMessage}&parse_mode=HTML`;
             
             try {
-                // Usando l'approccio con URL parameters invece che POST
                 const response = await fetch(url);
                 
                 if (!response.ok) {
@@ -94,7 +91,7 @@
                 await batteryCharacteristic.startNotifications();
                 batteryCharacteristic.addEventListener('characteristicvaluechanged', handleBatteryChange);
                 
-                // Leggi il valore iniziale della batteria
+                // Initial battery level
                 const batteryInitial = await batteryCharacteristic.readValue();
                 updateBatteryLevel(batteryInitial.getUint8(0));
 
@@ -179,10 +176,10 @@ La persona non si è rialzata dopo la caduta. È necessario un intervento immedi
             }
         
             try {
-                // Invia il comando di reset
+                // Send reset command
                 await fallCharacteristic.writeValue(new Uint8Array([0x00]));
                 
-                // Aggiorna lo stato dell'interfaccia
+                //Update UI
                 statusDiv.textContent = 'Status: Connected - No Alarm';
                 statusDiv.className = 'connected';
                 resetAlarmBtn.style.display = 'none';
