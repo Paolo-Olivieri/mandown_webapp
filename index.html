@@ -109,7 +109,7 @@
        async function sendTelegramAlert(message) {
             // Encode il messaggio per l'URL
             const encodedMessage = encodeURIComponent(message);
-            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodedMessage}`;
+            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodedMessage}&parse_mode=MarkdownV2`;
             
             try {
                 // Usando l'approccio con URL parameters invece che POST
@@ -179,7 +179,7 @@
                 device.addEventListener('gattserverdisconnected', handleDisconnection);
 
                 const connectionMessage = 
-`🟢 DISPOSITIVO CONNESSO
+`🟢 <b>DISPOSITIVO CONNESSO</b>
 
 ⏰ ${new Date().toLocaleString('it-IT')}
 ✅ Sistema attivo e pronto al monitoraggio`;
