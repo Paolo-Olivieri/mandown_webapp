@@ -194,6 +194,11 @@
                     statusDiv.className = 'connected';
                     resetAlarmBtn.style.display = 'none';
                     stopAlarm();
+                    const fallMessage = `
+✅ La persona sta bene ✅
+                    
+Il sistema sta monitorando lo stato della persona`;
+                    sendTelegramAlert(fallMessage);
                     break;
                 case 0x01:
                     statusDiv.textContent = 'Status: Fall Detected!';
@@ -201,13 +206,13 @@
                     resetAlarmBtn.style.display = 'block';
                     playAlarm();
                     const fallMessage = `
-                    🚨 <b>ATTENZIONE: Rilevata Caduta!</b>
+🚨 ATTENZIONE: Rilevata Caduta!
                     
-                    ⏰ Ora: ${timestamp}
-                    📍 Posizione: Non disponibile
-                    ℹ️ Stato: In attesa di conferma recupero
+⏰ Ora: ${timestamp}
+📍 Posizione: Non disponibile
+ℹ️ Stato: In attesa di conferma recupero
                     
-                    <i>Il sistema sta monitorando il recupero della persona. Se non viene rilevato un recupero entro 60 secondi, verrà attivato l'allarme di emergenza.</i>`;
+Il sistema sta monitorando il recupero della persona. Se non viene rilevato un recupero entro 60 secondi, verrà attivato l'allarme di emergenza.`;
                     sendTelegramAlert(fallMessage);
                     break;
                     
@@ -217,13 +222,13 @@
                     resetAlarmBtn.style.display = 'none';
                     playAlarm();
                     const emergencyMessage = `
-                    🚨 <b>EMERGENZA: PERSONA A TERRA!</b>
+🚨🚨 EMERGENZA GRAVE: PERSONA A TERRA!
                     
-                    ⏰ Ora: ${timestamp}
-                    📍 Posizione: Non disponibile
-                    ❗️ Stato: Richiesto intervento immediato
+⏰ Ora: ${timestamp}
+📍 Posizione: Non disponibile
+❗️ Stato: Richiesto intervento immediato
                     
-                    <i>La persona non si è rialzata dopo la caduta. È necessario un intervento immediato!</i>`;
+La persona non si è rialzata dopo la caduta. È necessario un intervento immediato!`;
                     sendTelegramAlert(emergencyMessage);
                     break;
             }
