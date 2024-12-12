@@ -268,9 +268,9 @@ La persona non si è rialzata dopo la caduta. È necessario un intervento immedi
 
         function handleDisconnection() {
             stopAlarm();
-            const disconnectionMessage = '
+            const disconnectionMessage =`
 🔴 DISPOSITIVO DISCONNESSO 🔴
-⚠️ Il monitoraggio è stato interrotto';
+⚠️ Il monitoraggio è stato interrotto`;
             sendTelegramAlert(disconnectionMessage);
             statusDiv.textContent = 'Status: Disconnected';
             statusDiv.className = 'disconnected';
