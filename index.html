@@ -24,10 +24,18 @@
             color: white;
             border: none;
             border-radius: 5px;
+            transition: background-color 0.3s;
         }
         button:disabled {
             background-color: #cccccc;
             cursor: not-allowed;
+        }
+        #resetAlarmBtn {
+            background-color: #dc3545;
+            display: none;
+        }
+        #resetAlarmBtn:hover {
+            background-color: #c82333;
         }
         #status {
             padding: 10px;
@@ -42,6 +50,14 @@
             background-color: #f8d7da;
             color: #721c24;
         }
+        .alarm {
+            background-color: #dc3545;
+            color: white;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            50% { opacity: 0.8; }
+        }
     </style>
 </head>
 <body>
@@ -49,7 +65,7 @@
         <h1>Man Down Monitor</h1>
         <div id="status" class="disconnected">Status: Disconnected</div>
         <button id="connectBtn">Connect Device</button>
-        <button id="resetAlarmBtn" disabled>Reset Alarm</button>
+        <button id="resetAlarmBtn" style="display: none;">Reset Alarm</button>
     </div>
 
     <script>
@@ -59,13 +75,29 @@
         
         let fallCharacteristic = null;
         let device = null;
+        let isConnected = false;
 
         const connectBtn = document.getElementById('connectBtn');
         const resetAlarmBtn = document.getElementById('resetAlarmBtn');
         const statusDiv = document.getElementById('status');
 
-        connectBtn.addEventListener('click', connectToDevice);
+        connectBtn.addEventListener('click', handleConnectionClick);
         resetAlarmBtn.addEventListener('click', resetAlarm);
+
+        async function handleConnectionClick() {
+            if (isConnected) {
+                await disconnectDevice();
+            } else {
+                await connectToDevice();
+            }
+        }
+
+        async function disconnectDevice() {
+            if (device && device.gatt.connected) {
+                await device.gatt.disconnect();
+            }
+            handleDisconnection();
+        }
 
         async function connectToDevice() {
             try {
@@ -94,7 +126,7 @@
                 statusDiv.textContent = 'Status: Connected';
                 statusDiv.className = 'connected';
                 connectBtn.textContent = 'Disconnect';
-                resetAlarmBtn.disabled = false;
+                isConnected = true;
 
                 // Update connect button to handle disconnect
                 device.addEventListener('gattserverdisconnected', handleDisconnection);
@@ -102,6 +134,7 @@
             } catch (error) {
                 console.error('Error:', error);
                 statusDiv.textContent = `Error: ${error.message}`;
+                handleDisconnection();
             }
         }
 
@@ -110,25 +143,34 @@
             switch(value) {
                 case 0x00:
                     statusDiv.textContent = 'Status: Connected - No Alarm';
+                    statusDiv.className = 'connected';
+                    resetAlarmBtn.style.display = 'none';
                     break;
                 case 0x01:
                     statusDiv.textContent = 'Status: Fall Detected!';
+                    statusDiv.className = 'alarm';
+                    resetAlarmBtn.style.display = 'block';
                     break;
                 case 0x02:
                     statusDiv.textContent = 'Status: ALARM - MAN DOWN!';
+                    statusDiv.className = 'alarm';
+                    resetAlarmBtn.style.display = 'block';
                     break;
             }
         }
 
         async function resetAlarm() {
-            if (fallCharacteristic) {
+            if (fallCharacteristic && isConnected) {
                 try {
                     // Write 0x00 to reset the alarm
                     await fallCharacteristic.writeValue(new Uint8Array([0x00]));
                     statusDiv.textContent = 'Status: Alarm Reset';
+                    statusDiv.className = 'connected';
+                    resetAlarmBtn.style.display = 'none';
                 } catch (error) {
                     console.error('Error resetting alarm:', error);
                     statusDiv.textContent = `Error: ${error.message}`;
+                    handleDisconnection();
                 }
             }
         }
@@ -137,8 +179,10 @@
             statusDiv.textContent = 'Status: Disconnected';
             statusDiv.className = 'disconnected';
             connectBtn.textContent = 'Connect Device';
-            resetAlarmBtn.disabled = true;
+            resetAlarmBtn.style.display = 'none';
+            isConnected = false;
             fallCharacteristic = null;
+            device = null;
         }
     </script>
 </body>
