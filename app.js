@@ -1,6 +1,9 @@
         // BLE UUIDs from the Arduino code
         const FALL_SERVICE_UUID = '19b10000-0000-537e-4f6c-d104768a1214';
         const FALL_CHARACTERISTIC_UUID = '19b10000-1111-537e-4f6c-d104768a1214';
+        
+        const BATTERY_SERVICE_UUID = '180F';  // UUID standard per il servizio batteria
+        const BATTERY_CHARACTERISTIC_UUID = '2A19';  // UUID standard per la caratteristica livello batteria
 
         // Telegram configuration
         const BOT_TOKEN = '7795056451:AAEeJD6Dg7s1WL2hB8JeSNCMZdtqOZNcMaM';
@@ -73,17 +76,28 @@
             try {
                 device = await navigator.bluetooth.requestDevice({
                     filters: [{ name: 'Man Down' }],
-                    optionalServices: [FALL_SERVICE_UUID]
+                    optionalServices: [FALL_SERVICE_UUID, BATTERY_SERVICE_UUID]
                 });
 
                 statusDiv.textContent = 'Connecting...';
-                
+
+                // Fall Service
                 const server = await device.gatt.connect();
                 const service = await server.getPrimaryService(FALL_SERVICE_UUID);
                 fallCharacteristic = await service.getCharacteristic(FALL_CHARACTERISTIC_UUID);
-
                 await fallCharacteristic.startNotifications();
                 fallCharacteristic.addEventListener('characteristicvaluechanged', handleAlarmChange);
+
+                // Battery Service
+                const batteryService = await server.getPrimaryService(BATTERY_SERVICE_UUID);
+                const batteryCharacteristic = await batteryService.getCharacteristic(BATTERY_CHARACTERISTIC_UUID);
+                await batteryCharacteristic.startNotifications();
+                batteryCharacteristic.addEventListener('characteristicvaluechanged', handleBatteryChange);
+                
+                // Leggi il valore iniziale della batteria
+                const batteryInitial = await batteryCharacteristic.readValue();
+                updateBatteryLevel(batteryInitial.getUint8(0));
+
 
                 statusDiv.textContent = 'Status: Connected';
                 statusDiv.className = 'connected';
@@ -194,6 +208,17 @@ La persona non si è rialzata dopo la caduta. È necessario un intervento immedi
             isConnected = false;
             fallCharacteristic = null;
             device = null;
+        }
+
+        // Check battery level change
+        function handleBatteryChange(event) {
+            const batteryLevel = event.target.value.getUint8(0);
+            updateBatteryLevel(batteryLevel);
+        }
+        
+        // Update battery level
+        function updateBatteryLevel(level) {
+            document.getElementById('batteryLevel').textContent = `Batteria: ${level}%`;
         }
 
         // Check Web Bluetooth API support
