@@ -72,9 +72,15 @@
         }
 
         function playConnectionSound() {
-            connectionSound.currentTime = 0;
-            connectionSound.play().catch(e => console.log('Audio play failed:', e));
-        }
+    connectionSound.currentTime = 0;
+    connectionSound.play()
+        .then(() => console.log('Audio played successfully'))
+        .catch(e => {
+            console.log('Audio play failed:', e);
+            // Retry playing with user interaction
+            connectionSound.play();
+        });
+}
 
         function playDisconnectionSound() {
             disconnectionSound.currentTime = 0;
