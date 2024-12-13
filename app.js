@@ -14,6 +14,8 @@
         let isConnected = false;
         let alarmSound = document.getElementById('alarmSound');
         let soundEnabled = document.getElementById('soundEnabled');
+        let connectionSound = document.getElementById('connectionSound');
+        let disconnectionSound = document.getElementById('disconnectionSound');
 
         const connectBtn = document.getElementById('connectBtn');
         const resetAlarmBtn = document.getElementById('resetAlarmBtn');
@@ -69,6 +71,17 @@
             alarmSound.currentTime = 0;
         }
 
+        function playConnectionSound() {
+            connectionSound.currentTime = 0;
+            connectionSound.play().catch(e => console.log('Audio play failed:', e));
+        }
+
+        function playDisconnectionSound() {
+            disconnectionSound.currentTime = 0;
+            disconnectionSound.play().catch(e => console.log('Audio play failed:', e));
+        }
+
+
         async function connectToDevice() {
             try {
                 device = await navigator.bluetooth.requestDevice({
@@ -95,6 +108,7 @@
                 const batteryInitial = await batteryCharacteristic.readValue();
                 updateBatteryLevel(batteryInitial.getUint8(0));
 
+                playConnectionSound();
 
                 statusDiv.textContent = 'Status: Connected';
                 statusDiv.className = 'connected';
