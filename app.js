@@ -207,6 +207,7 @@ La persona non si è rialzata dopo la caduta. È necessario un intervento immedi
 
         function handleDisconnection() {
             stopAlarm();
+            playDisconnectionSound();
             const disconnectionMessage =`
 🔴 <b>DISPOSITIVO DISCONNESSO</b>
 
