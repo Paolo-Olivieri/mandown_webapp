@@ -56,7 +56,6 @@
                 await device.gatt.disconnect();
             }
             stopAlarm();
-            handleDisconnection();
         }
 
         function playAlarm() {
@@ -72,8 +71,8 @@
         }
 
         function playConnectionSound() {
-    connectionSound.currentTime = 0;
-    connectionSound.play()
+        connectionSound.currentTime = 0;
+        connectionSound.play()
         .then(() => console.log('Audio played successfully'))
         .catch(e => {
             console.log('Audio play failed:', e);
