@@ -59,10 +59,8 @@
         }
 
         function playAlarm() {
-            //if (soundEnabled.checked) {
                 alarmSound.currentTime = 0;
                 alarmSound.play().catch(e => console.log('Audio play failed:', e));
-            //}
         }
 
         function stopAlarm() {
