@@ -13,7 +13,7 @@
         let device = null;
         let isConnected = false;
         let alarmSound = document.getElementById('alarmSound');
-        let soundEnabled = document.getElementById('soundEnabled');
+        //let soundEnabled = document.getElementById('soundEnabled');
         let connectionSound = document.getElementById('connectionSound');
         let disconnectionSound = document.getElementById('disconnectionSound');
 
@@ -59,10 +59,10 @@
         }
 
         function playAlarm() {
-            if (soundEnabled.checked) {
+            //if (soundEnabled.checked) {
                 alarmSound.currentTime = 0;
                 alarmSound.play().catch(e => console.log('Audio play failed:', e));
-            }
+            //}
         }
 
         function stopAlarm() {
@@ -135,7 +135,7 @@
                 
                 // Check if the error is due to user cancelling the request
                 if (error.name === 'NotFoundError' || error.message.includes('User cancelled')) {
-                    statusDiv.textContent = 'Connection cancelled';
+                    statusDiv.textContent = 'Status: Disconnected';
                     return; // Don't trigger disconnection handling
                 }
                 
