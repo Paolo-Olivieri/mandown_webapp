@@ -132,8 +132,20 @@
                 
             } catch (error) {
                 console.error('Error:', error);
+                
+                // Check if the error is due to user cancelling the request
+                if (error.name === 'NotFoundError' || error.message.includes('User cancelled')) {
+                    statusDiv.textContent = 'Connection cancelled';
+                    return; // Don't trigger disconnection handling
+                }
+                
+                // For actual connection errors
                 statusDiv.textContent = `Error: ${error.message}`;
-                handleDisconnection();
+                
+                // Only handle disconnection if we were previously connected
+                if (isConnected) {
+                    handleDisconnection();
+                }
             }
         }
 
