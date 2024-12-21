@@ -13,7 +13,6 @@
         let device = null;
         let isConnected = false;
         let alarmSound = document.getElementById('alarmSound');
-        let wakeLock = null;  // Aggiungi questa linea
         //let soundEnabled = document.getElementById('soundEnabled');
         let connectionSound = document.getElementById('connectionSound');
         let disconnectionSound = document.getElementById('disconnectionSound');
@@ -255,34 +254,3 @@ La persona non si è rialzata dopo la caduta. È necessario un intervento immedi
             connectBtn.disabled = true;
         }
 
-async function requestWakeLock() {
-    try {
-        if ('wakeLock' in navigator) {
-            wakeLock = await navigator.wakeLock.request('screen');
-            console.log('Wake Lock attivato');
-            
-            // Riattiva il wake lock quando il documento diventa visibile
-            document.addEventListener('visibilitychange', async () => {
-                if (document.visibilityState === 'visible' && isConnected) {
-                    wakeLock = await navigator.wakeLock.request('screen');
-                    console.log('Wake Lock riattivato');
-                }
-            });
-        }
-    } catch (err) {
-        console.error('Wake Lock non supportato:', err);
-    }
-}
-
-// Funzione per rilasciare il wake lock
-async function releaseWakeLock() {
-    if (wakeLock) {
-        try {
-            await wakeLock.release();
-            wakeLock = null;
-            console.log('Wake Lock rilasciato');
-        } catch (err) {
-            console.error('Errore nel rilascio del Wake Lock:', err);
-        }
-    }
-}
