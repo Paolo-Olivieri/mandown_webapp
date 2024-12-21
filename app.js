@@ -254,3 +254,59 @@ La persona non si è rialzata dopo la caduta. È necessario un intervento immedi
             connectBtn.disabled = true;
         }
 
+
+// Registrazione del Service Worker
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then(registration => {
+                console.log('ServiceWorker registrato correttamente:', registration);
+            })
+            .catch(error => {
+                console.log('Errore registrazione ServiceWorker:', error);
+            });
+    });
+}
+// Gestione installazione PWA per Android
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('Evento beforeinstallprompt ricevuto');
+    // Previeni il prompt automatico
+    e.preventDefault();
+    // Salva l'evento
+    deferredPrompt = e;
+    
+    // Mostra il banner personalizzato
+    const banner = document.getElementById('installBanner');
+    if (banner) {
+        banner.style.display = 'block';
+    }
+});
+
+// Gestisci il click sul pulsante di installazione
+document.getElementById('installButton')?.addEventListener('click', async () => {
+    if (deferredPrompt) {
+        // Mostra il prompt di installazione
+        deferredPrompt.prompt();
+        
+        // Aspetta la scelta dell'utente
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`Utente ha scelto: ${outcome}`);
+        
+        // Non possiamo riusare il prompt
+        deferredPrompt = null;
+        
+        // Nascondi il banner
+        document.getElementById('installBanner').style.display = 'none';
+    } else {
+        console.log('Nessun prompt di installazione disponibile');
+    }
+});
+
+// Rileva se l'app è già installata
+window.addEventListener('appinstalled', () => {
+    console.log('App installata con successo');
+    // Nascondi il banner
+    document.getElementById('installBanner').style.display = 'none';
+});

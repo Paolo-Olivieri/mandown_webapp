@@ -3,8 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#007bff">
+    <meta name="description" content="Sistema di monitoraggio Man Down con supporto Bluetooth">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Man Down">
+    
+    <!-- Link per PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    
     <title>Man Down Monitor</title>
     <style>
+
+         #installBanner {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem;
+            background: #007bff;
+            color: white;
+            text-align: center;
+            z-index: 1000;
+        }
+        
+        #installButton {
+            margin-left: 1rem;
+            padding: 0.5rem 1rem;
+            background: white;
+            color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
         body {
             font-family: Arial, sans-serif;
             max-width: 800px;
@@ -75,6 +109,10 @@
         <div id="batteryLevel" style="text-align: center; margin-top: 10px;">
             Batteria: --
         </div>
+        <div id="installBanner">
+            Installa l'app per un monitoraggio migliore
+            <button id="installButton">Installa</button>
+        </div>
     </div>
 
     <!-- Audio element for alarm sound -->
@@ -89,6 +127,8 @@
     <audio id="disconnectionSound">
         <source src="disconnection.mp3" type="audio/mpeg">
     </audio>
+
+    
 
     <script src="app.js"></script>
 </body>
