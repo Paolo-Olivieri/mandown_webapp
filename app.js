@@ -16,7 +16,7 @@
         //let soundEnabled = document.getElementById('soundEnabled');
         let connectionSound = document.getElementById('connectionSound');
         let disconnectionSound = document.getElementById('disconnectionSound');
-        //let criticalSound = document.getElementById('criticalSound');
+        let criticalSound = document.getElementById('criticalSound');
 
         const connectBtn = document.getElementById('connectBtn');
         const resetAlarmBtn = document.getElementById('resetAlarmBtn');
@@ -69,14 +69,19 @@
         function stopAlarm() {
             alarmSound.pause();
             alarmSound.currentTime = 0;
+            stopCritical();
         }
 
-/*
         function playCritical() {
-                criticalSound.currentTime = 0;
-                criticalSound.play().catch(e => console.log('Audio play failed:', e));
+            criticalSound.currentTime = 0;
+            criticalSound.play().catch(e => console.log('Audio play failed:', e));
         }
-*/
+
+        function stopCritical() {
+            criticalSound.pause();
+            criticalSound.currentTime = 0;
+        }
+
         function playConnectionSound() {
         connectionSound.currentTime = 0;
         connectionSound.play()
@@ -176,6 +181,7 @@ Il sistema sta monitorando lo stato della persona`;
                     statusDiv.className = 'alarm';
                     resetAlarmBtn.style.display = 'block';
                     playAlarm();
+                    stopCritical();
                     const fallMessage = `
 🚨 <b>ATTENZIONE: Rilevata Caduta!</b>
                     
@@ -191,8 +197,8 @@ Il sistema sta monitorando lo stato della persona`;
                     statusDiv.textContent = 'Status: ALARM - MAN DOWN!';
                     statusDiv.className = 'alarm';
                     resetAlarmBtn.style.display = 'none';
-                    playAlarm();
-                    //playCritical();
+                    stopAlarm();
+                    playCritical();
                     const emergencyMessage = `
 🚨🚨 <b>EMERGENZA GRAVE: PERSONA A TERRA!</b>
                     
