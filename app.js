@@ -16,7 +16,7 @@
         //let soundEnabled = document.getElementById('soundEnabled');
         let connectionSound = document.getElementById('connectionSound');
         let disconnectionSound = document.getElementById('disconnectionSound');
-        let criticalSound = document.getElementById('criticalSound');
+        //let criticalSound = document.getElementById('criticalSound');
 
         const connectBtn = document.getElementById('connectBtn');
         const resetAlarmBtn = document.getElementById('resetAlarmBtn');
@@ -71,11 +71,12 @@
             alarmSound.currentTime = 0;
         }
 
+/*
         function playCritical() {
                 criticalSound.currentTime = 0;
                 criticalSound.play().catch(e => console.log('Audio play failed:', e));
         }
-
+*/
         function playConnectionSound() {
         connectionSound.currentTime = 0;
         connectionSound.play()
@@ -190,8 +191,8 @@ Il sistema sta monitorando lo stato della persona`;
                     statusDiv.textContent = 'Status: ALARM - MAN DOWN!';
                     statusDiv.className = 'alarm';
                     resetAlarmBtn.style.display = 'none';
-                    stopAlarm();
-                    playCritical();
+                    playAlarm();
+                    //playCritical();
                     const emergencyMessage = `
 🚨🚨 <b>EMERGENZA GRAVE: PERSONA A TERRA!</b>
                     
