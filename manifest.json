@@ -2,7 +2,7 @@
   "name": "Man Down Monitor",
   "short_name": "Man Down",
   "description": "Applicazione per il monitoraggio delle cadute",
-  "start_url": "/mandown_webapp/",
+  "start_url": "/mandown_webapp/index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#007bff",
