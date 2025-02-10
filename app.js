@@ -189,7 +189,7 @@ Il sistema sta monitorando lo stato della persona`;
 📍 <i>Posizione</i>: Non disponibile
 ℹ️ <i>Stato</i>: In attesa di conferma recupero
                     
-<i>Il sistema sta monitorando il recupero della persona. Se non viene rilevato un recupero entro 60 secondi, verrà attivato l'allarme di emergenza.</i>`;
+<i>Il sistema sta monitorando il recupero della persona. Se non viene rilevato un recupero entro 20 secondi, verrà attivato l'allarme di emergenza.</i>`;
                     sendTelegramAlert(fallMessage);
                     break;
                     
