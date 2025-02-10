@@ -102,8 +102,7 @@
         async function connectToDevice() {
             try {
                 device = await navigator.bluetooth.requestDevice({
-                    acceptAllDevices: true,    
-                    //filters: [{ name: 'Man Down' }],
+                    filters: [{ name: 'Man Down' }],
                     optionalServices: [FALL_SERVICE_UUID, BATTERY_SERVICE_UUID]
                 });
 
