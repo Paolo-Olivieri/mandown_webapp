@@ -197,6 +197,7 @@ Il sistema sta monitorando lo stato della persona`;
                     statusDiv.textContent = 'Status: ALARM - MAN DOWN!';
                     statusDiv.className = 'alarm';
                     resetAlarmBtn.style.display = 'none';
+                    connectBtn.style.display = 'none';
                     stopAlarm();
                     playCritical();
                     const emergencyMessage = `
