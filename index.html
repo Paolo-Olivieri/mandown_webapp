@@ -66,11 +66,44 @@
             align-items: center;
             gap: 10px;
         }
+
+        #chatIdForm {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        #chatIdForm input {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        #chatIdForm button {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Man Down Monitor</h1>
+
+        <div id="chatIdForm">
+            <h3>Inserisci il Chat ID Telegram</h3>
+            <input type="text" id="chatIdInput" placeholder="Inserisci il Chat ID" required>
+            <button id="saveChatId">Salva Chat ID</button>
+        </div>
+
         <div id="status" class="disconnected">Status: Disconnected</div>
         <button id="connectBtn">Connect Device</button>
         <button id="resetAlarmBtn" style="display: none;">Reset Alarm</button>

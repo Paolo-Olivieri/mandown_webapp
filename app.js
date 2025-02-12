@@ -5,7 +5,7 @@
         const BATTERY_CHARACTERISTIC_UUID = '00002a19-0000-1000-8000-00805f9b34fb'; 
 
         const BOT_TOKEN = '7795056451:AAEeJD6Dg7s1WL2hB8JeSNCMZdtqOZNcMaM';
-        const CHAT_ID = '-4600073095'; 
+        let CHAT_ID = ''; 
         
         let fallCharacteristic = null;
         let device = null;
@@ -22,6 +22,41 @@
 
         connectBtn.addEventListener('click', handleConnectionClick);
         resetAlarmBtn.addEventListener('click', resetAlarm);
+
+        const chatIdForm = document.getElementById('chatIdForm');
+        const chatIdInput = document.getElementById('chatIdInput');
+        const saveChatIdBtn = document.getElementById('saveChatId');
+
+
+        function checkSavedChatId() {
+            const savedChatId = localStorage.getItem('manDownChatId');
+            if (savedChatId) {
+                CHAT_ID = savedChatId;
+                chatIdForm.classList.add('hidden');
+                connectBtn.classList.remove('hidden');
+                return true;
+            }
+            return false;
+        }
+
+        function saveChatId() {
+            const chatId = chatIdInput.value.trim();
+            if (chatId) {
+                CHAT_ID = chatId;
+                localStorage.setItem('manDownChatId', chatId);
+                chatIdForm.classList.add('hidden');
+                connectBtn.classList.remove('hidden');
+                
+                // Mostra un messaggio di conferma
+                statusDiv.textContent = 'Chat ID salvato. Pronto per la connessione.';
+                statusDiv.className = 'disconnected';
+            } else {
+                alert('Inserisci un Chat ID valido');
+            }
+        }
+
+        saveChatIdBtn.addEventListener('click', saveChatId);
+
 
 /*
        async function sendTelegramAlert(message) {
@@ -44,6 +79,12 @@
 */
 
     async function sendTelegramAlert(message) {
+
+        if (!CHAT_ID) {
+            console.error('Chat ID non impostato');
+            return;
+        }
+
         const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
         const payload = {
             chat_id: CHAT_ID,
@@ -299,3 +340,8 @@ La persona non si è rialzata dopo la caduta. È necessario un intervento immedi
             connectBtn.disabled = true;
         }
 
+document.addEventListener('DOMContentLoaded', () => {
+    if (!checkSavedChatId()) {
+        connectBtn.classList.add('hidden');
+    }
+});
