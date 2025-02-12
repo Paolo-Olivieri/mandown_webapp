@@ -23,6 +23,7 @@
         connectBtn.addEventListener('click', handleConnectionClick);
         resetAlarmBtn.addEventListener('click', resetAlarm);
 
+/*
        async function sendTelegramAlert(message) {
             const encodedMessage = encodeURIComponent(message);
             const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodedMessage}&parse_mode=HTML`;
@@ -40,6 +41,35 @@
                 console.error('Error sending Telegram notification:', error);
             }
         }
+*/
+
+    async function sendTelegramAlert(message) {
+        const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+        const payload = {
+            chat_id: CHAT_ID,
+            text: message,
+            parse_mode: 'HTML'
+        };
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                console.error('Telegram API error:', await response.text());
+                throw new Error('Failed to send Telegram notification');
+            }
+
+            console.log('Telegram notification sent successfully');
+        } catch (error) {
+            console.error('Error sending Telegram notification:', error);
+        }
+    }
 
         
         async function handleConnectionClick() {
